@@ -63,6 +63,17 @@ void matrix_init_kb(void) {
         gpio_set_pin_input_high(BUTTON_PINS[i]);
     }
 
+#if defined(RGB_MATRIX_ENABLE) && !defined(HALCYON_LEGACY)
+    // The keyboard's LED map only covers its own columns, so the virtual button
+    // columns are zero-initialised and point at LED 0. Mark them as having no LED,
+    // otherwise effects that walk the matrix (e.g. typing heatmap) stop early.
+    for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
+        for (uint8_t col = VIRTUAL_COL_START; col < MATRIX_COLS; col++) {
+            g_led_config.matrix_co[row][col] = NO_LED;
+        }
+    }
+#endif
+
     matrix_init_user();
 }
 
