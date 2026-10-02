@@ -23,7 +23,7 @@
 #define HSV_LAYER_6 131, 99, 255
 #define HSV_LAYER_7 154, 94, 255
 #define HSV_LAYER_5 176, 77, 255
-// #define HSV_LAYER_8 213, 56, 255
+#define HSV_LAYER_8 213, 56, 255
 #define HSV_LAYER_UNDEF 0, 255, 255
 
 extern painter_device_t lcd;

@@ -14,7 +14,7 @@
 #define RGB_MATRIX_FRAMEBUFFER_EFFECTS
 #define RGB_MATRIX_KEYPRESSES
 
-#define DYNAMIC_KEYMAP_LAYER_COUNT 8
+#define DYNAMIC_KEYMAP_LAYER_COUNT 9
 
 #define TAPPING_TOGGLE 2 // can double tap into a layer if set using TT
 #define TAPPING_TERM 175
@@ -36,7 +36,11 @@
 // #define POINTING_DEVICE_INVERT_X
 // #define POINTING_DEVICE_INVERT_Y
 //
-// Switch to a mouse layer automatically when the trackpad is touched. Needs a
-// layer with mouse buttons on it, and set_auto_mouse_enable(true) in trackpad.c.
-// #define POINTING_DEVICE_AUTO_MOUSE_ENABLE
-// #define AUTO_MOUSE_DEFAULT_LAYER <mouse layer number>
+// Mouse layer (8) turns on when the trackpad is touched and stays on while a
+// mouse button is held. It turns off AUTO_MOUSE_TIME ms after the last
+// movement, or as soon as a non-mouse key is pressed.
+#define POINTING_DEVICE_AUTO_MOUSE_ENABLE
+#define AUTO_MOUSE_DEFAULT_LAYER 8
+// #define AUTO_MOUSE_TIME 650
+// Movement needed to turn the layer on; raise it if light touches trigger it.
+// #define AUTO_MOUSE_THRESHOLD 10

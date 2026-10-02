@@ -1,13 +1,20 @@
 // Runtime tuning for the Halcyon Cirque trackpad on the left half.
-// Only built into the cirque firmware; the values below are the current
-// defaults, so change them to adjust behaviour.
+// The trackpad settings are only built into the cirque firmware; the values
+// below are the current defaults, so change them to adjust behaviour.
 
 #include QMK_KEYBOARD_H
 
 #ifdef HLC_CIRQUE_TRACKPAD
 #    include "drivers/sensors/cirque_pinnacle_gestures.h"
+#endif
 
 void keyboard_post_init_user(void) {
+#ifdef POINTING_DEVICE_AUTO_MOUSE_ENABLE
+    // Auto mouse layer runs on whichever half is plugged in, so enable it on both.
+    set_auto_mouse_enable(true);
+#endif
+
+#ifdef HLC_CIRQUE_TRACKPAD
     // Pointer speed. Default is ~740 for the 35mm pad; higher is faster.
     cirque_pinnacle_set_cpi(740);
 
@@ -27,5 +34,5 @@ void keyboard_post_init_user(void) {
     // wheel_clicks:   scroll steps per full circle
     // left_handed:    reverse scroll direction
     cirque_pinnacle_configure_circular_scroll(33, 16, 9102, 18, false);
-}
 #endif
+}

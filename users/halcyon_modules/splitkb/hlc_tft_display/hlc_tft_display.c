@@ -233,6 +233,10 @@ void update_display(void) {
                 layer_number = qp_load_image_mem(gfx_7);
                 qp_drawimage_recolor(lcd_surface, 5, 5, layer_number, HSV_LAYER_7, HSV_BLACK);
                 break;
+            case 8:
+                layer_number = qp_load_image_mem(gfx_8);
+                qp_drawimage_recolor(lcd_surface, 5, 5, layer_number, HSV_LAYER_8, HSV_BLACK);
+                break;
             default:
                 layer_number = qp_load_image_mem(gfx_undef);
                 qp_drawimage_recolor(lcd_surface, 5, 5, layer_number, HSV_LAYER_UNDEF, HSV_BLACK);
