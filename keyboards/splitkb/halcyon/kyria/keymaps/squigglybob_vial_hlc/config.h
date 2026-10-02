@@ -44,3 +44,13 @@
 // #define AUTO_MOUSE_TIME 650
 // Movement needed to turn the layer on; raise it if light touches trigger it.
 // #define AUTO_MOUSE_THRESHOLD 10
+
+// Display (right half): switch to the Game of Life after 2 minutes idle
+// instead of turning off. Any key or trackpad input brings the status back.
+// Set HLC_BACKLIGHT_TIMEOUT to a time in ms to also turn the screen off later.
+#define HLC_TFT_IDLE_TIMEOUT 120000
+#define HLC_BACKLIGHT_TIMEOUT 0
+
+// Share key/trackpad activity between halves so the display half knows when
+// the other half is being used.
+#define SPLIT_ACTIVITY_ENABLE

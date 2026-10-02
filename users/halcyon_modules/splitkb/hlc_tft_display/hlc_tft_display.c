@@ -41,6 +41,10 @@ painter_device_t lcd_surface;
 led_t         last_led_usb_state = {0};
 layer_state_t last_layer_state   = {0};
 
+static bool fonts_loaded    = false;
+static bool first_run_led   = false;
+static bool first_run_layer = false;
+
 #define GRID_WIDTH 27
 #define GRID_HEIGHT 48
 #define CELL_SIZE 4 // Cell size excluding outline
@@ -179,13 +183,11 @@ void add_cell_cluster() {
 }
 
 void update_display(void) {
-    static bool first_run_led   = false;
-    static bool first_run_layer = false;
-
-    if (first_run_layer == false) {
+    if (!fonts_loaded) {
         // Load fonts
         Retron27           = qp_load_font_mem(font_Retron2000_27);
         Retron27_underline = qp_load_font_mem(font_Retron2000_underline_27);
+        fonts_loaded       = true;
     }
 
     if (last_led_usb_state.raw != host_keyboard_led_state().raw || first_run_led == false) {
@@ -247,6 +249,44 @@ void update_display(void) {
     }
 }
 
+// Clear the screen and redraw the layer and lock status from scratch
+static void redraw_display(void) {
+    qp_rect(lcd_surface, 0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1, HSV_BLACK, true);
+    first_run_led   = false;
+    first_run_layer = false;
+    update_display();
+}
+
+// Advance the Game of Life, starting a fresh grid when reset is true
+static void game_of_life_task(bool reset) {
+    static bool     seeded                        = false;
+    static uint32_t last_draw                     = 0;
+    static uint32_t previous_matrix_activity_time = 0;
+
+    if (!seeded) {
+        srand(get_random_32bit());
+        seeded = true;
+    }
+
+    if (reset) {
+        init_grid();
+        color_value = rand() % 8;
+    }
+
+    if (timer_elapsed32(last_draw) >= 100) { // Throttle to 10 fps
+        draw_grid();
+        update_grid();
+
+        if (previous_matrix_activity_time != last_matrix_activity_time()) {
+            color_value = rand() % 8;
+            add_cell_cluster();
+            previous_matrix_activity_time = last_matrix_activity_time();
+        }
+
+        last_draw = timer_read32();
+    }
+}
+
 // Called from halcyon.c
 void module_suspend_power_down_kb(void) {
     qp_power(lcd, false);
@@ -294,34 +334,38 @@ bool display_module_housekeeping_task_kb(bool second_display) {
     }
 
     if (second_display) {
-        static uint32_t last_draw                     = 0;
-        static bool     second_display_set            = false;
-        static uint32_t previous_matrix_activity_time = 0;
+        static bool second_display_set = false;
 
-        if (!second_display_set) {
-            srand(get_random_32bit());
-            init_grid();
-            color_value        = rand() % 8;
-            second_display_set = true;
-        }
-
-        if (timer_elapsed32(last_draw) >= 100) { // Throttle to 10 fps
-            draw_grid();
-            update_grid();
-
-            if (previous_matrix_activity_time != last_matrix_activity_time()) {
-                color_value = rand() % 8;
-                add_cell_cluster();
-                previous_matrix_activity_time = last_matrix_activity_time();
-            }
-
-            last_draw = timer_read32();
-        }
+        game_of_life_task(!second_display_set);
+        second_display_set = true;
     }
 
     // Update display information (layers, numlock, etc.)
     if (!second_display) {
+#ifdef HLC_TFT_IDLE_TIMEOUT
+        // Show the Game of Life while idle instead of the status screen
+        static bool     idle         = false;
+        static uint32_t last_cluster = 0;
+
+        if (last_input_activity_elapsed() > HLC_TFT_IDLE_TIMEOUT) {
+            game_of_life_task(!idle);
+            idle = true;
+
+            // Nothing is typed while idle, so keep the grid from dying out
+            if (timer_elapsed32(last_cluster) >= 2000) {
+                add_cell_cluster();
+                last_cluster = timer_read32();
+            }
+        } else {
+            if (idle) {
+                idle = false;
+                redraw_display();
+            }
+            update_display();
+        }
+#else
         update_display();
+#endif
     }
 
     // Move surface to lcd
