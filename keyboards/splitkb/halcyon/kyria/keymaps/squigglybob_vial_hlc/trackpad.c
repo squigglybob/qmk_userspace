@@ -22,7 +22,7 @@ void keyboard_post_init_user(void) {
     cirque_pinnacle_enable_tap(true);
 
     // Cursor keeps moving briefly after a flick.
-    cirque_pinnacle_enable_cursor_glide(true);
+    cirque_pinnacle_enable_cursor_glide(false);
     // Movement (px) needed before glide kicks in; raise it if the cursor drifts on lift-off.
     cirque_pinnacle_configure_cursor_glide(10);
 
